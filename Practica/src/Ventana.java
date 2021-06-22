@@ -92,7 +92,9 @@ public class Ventana extends JFrame implements ActionListener {
                         key2=false;
                     }
                     if (Asignaciones.exists()){
-                        Main.CargarAsignaciones(DireccionCarpeta.getText()+"\\asignaciones.csv");
+                        if(key1&&key2) {
+                            Main.CargarAsignaciones(DireccionCarpeta.getText() + "\\asignaciones.csv");
+                        }
                         key3=true;
                     }else{
                         key3=false;
@@ -140,7 +142,6 @@ public class Ventana extends JFrame implements ActionListener {
                     //Carpeta no existe
                 }
             }else {
-                System.out.println("Campo vacio");
                 CarpetaNoExiste.setVisible(false);
                 FaltaArchivo.setVisible(false);
                 CampoVacio.setVisible(true);

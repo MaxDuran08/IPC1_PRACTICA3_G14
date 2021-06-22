@@ -15,8 +15,7 @@ public class Asignaciones {
         NombreC = nombreC;
     }
     public void Mostrar(){
-        System.out.println("ID:\t"+getIdAlumno()+".\tCarne:\t"+getCarneA()+".\tNombre del alumno:\t"+getNombreA()+".\tGenero:\t"+getGenero()+".\tFecha de nacimiento:\t"+getFechaNacimiento());
-        System.out.println("ID Curso:\t"+getIdCurso()+".\tCodigo:\t"+getCodigoC()+".\tNombre:\t"+getNombreC()+".\tNota:\t"+getNota());
+        System.out.println("ID:\t"+getIdAlumno()+".\tCarne:\t"+getCarneA()+".\tNombre del alumno:\t"+getNombreA()+".\tGenero:\t"+getGenero()+".\tFecha de nacimiento:\t"+getFechaNacimiento()+".\tID Curso:\t"+getIdCurso()+".\tCodigo:\t"+getCodigoC()+".\tNombre:\t"+getNombreC()+".\tNota:\t"+getNota());
     }
 
     public int getIdCurso() {

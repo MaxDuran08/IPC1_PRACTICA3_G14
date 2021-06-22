@@ -149,6 +149,7 @@ public class Main {
             int idCurso,idAlumno,CarneA=0,CodigoC=0;
             Float Nota;
             String NombreA="",FechaNacimiento="",Genero="",NombreC="";
+            Boolean keyCurso=false,keyAlumno=false;
             AsignacionesCargadas=0;
             for (int i = 0; i < contenido.length; i++) {
                 String[] temp=contenido[i].split(",");
@@ -163,7 +164,10 @@ public class Main {
                             FechaNacimiento=Alumnos[j].getFechaNacimiento();
                             CarneA=Alumnos[j].getCarne();
                             Genero=Alumnos[j].getGenero();
+                            keyAlumno=true;
                             break;
+                        }else{
+                            keyAlumno=false;
                         }
                     }
                     for (int j = 0; j < CursosCargados; j++) {
@@ -171,6 +175,10 @@ public class Main {
                             idCurso=Cursos[j].getId();
                             CodigoC=Cursos[j].getCodigo();
                             NombreC=Cursos[j].getNombre();
+                            keyCurso=true;
+                            break;
+                        }else{
+                            keyCurso=false;
                         }
                     }
                     int repeticionesCursos=0;
@@ -181,7 +189,7 @@ public class Main {
                             }
                         }
                     }
-                    if (repeticionesCursos<1){
+                    if ((repeticionesCursos<1)&&keyCurso&&keyAlumno){
                         Asignaciones Asignacion = new Asignaciones(idCurso,idAlumno,CarneA,CodigoC,Nota,NombreA,FechaNacimiento,Genero,NombreC);
                         Asignaciones[AsignacionesCargadas]=Asignacion;
                         AsignacionesCargadas++;
