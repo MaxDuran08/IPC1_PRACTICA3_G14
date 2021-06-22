@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 public class Archivos {
     public String leerArchivo(String direccion) {
@@ -10,13 +8,13 @@ public class Archivos {
         try {
             FR = new FileReader(direccion);
             buffR = new BufferedReader(FR);
-            String textoTemporal = "";
+            StringBuilder textoTemporal = new StringBuilder();
             String buffReader;
             while ((buffReader = buffR.readLine()) != null) {
 
-                textoTemporal = textoTemporal + buffReader + "#&";
+                textoTemporal.append(buffReader).append("#&");
             }
-            lectorTexto = textoTemporal;
+            lectorTexto = textoTemporal.toString();
             FR.close();
             buffR.close();
 
