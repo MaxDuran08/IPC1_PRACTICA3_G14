@@ -1,30 +1,40 @@
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 
 public class Ventana extends JFrame implements ActionListener {
-    public JPanel PanelGeneral;
+    public JPanel PanelGeneral,PanelGraficaPorSexo,PanelGraficaPorEdad,PanelGraficaPorNotas;
     public JButton CargarArchivos;
-    public JTextField DireccionCarpeta;
-    public JLabel CarpetaNoExiste,CampoVacio,FaltaArchivo;
+    public JTextField DireccionCarpeta,IDCurso;
+    public JCheckBox VerificacionGraficaPie,VerificacionGraficaBarrasEdades,VerificacionGraficaBarrasNotas;
+    public JLabel CarpetaNoExiste,CampoVacio,FaltaArchivo,IDString,IDNoExiste;
 //Ventana
     public Ventana() {
-        setSize(840, 600);
-        setTitle("Practica 3");
+        setSize(840, 630);
+        setTitle("Practica 3 Grupo #14");
         setResizable(false);
         setLayout(null);
         setLocationRelativeTo(null);
-        Componentes();
+        Componentes1();
+        Componentes2();
+        Componentes3();
         setIconImage(getIconImage());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 //Componentes
-    public void Componentes(){
+    public void Componentes1(){
 //        PanelGeneral
         PanelGeneral = new JPanel();
         PanelGeneral.setBounds(0,0,840,600);
-        PanelGeneral.setBackground(Color.YELLOW);
+        PanelGeneral.setBackground(Color.LIGHT_GRAY);
         PanelGeneral.setLayout(null);
         this.getContentPane().add(PanelGeneral);
 
@@ -54,13 +64,153 @@ public class Ventana extends JFrame implements ActionListener {
         FaltaArchivo.setForeground(Color.RED);
         FaltaArchivo.setVisible(false);
         PanelGeneral.add(FaltaArchivo);
+//        -----------------------------------------------------------
+        JLabel PideID = new JLabel("Ingrese el codigo del curso:");
+        PideID.setBounds(20,100,200,20);
+        PanelGeneral.add(PideID);
+        IDCurso = new JTextField();
+        IDCurso.setBounds(180,100,80,20);
+        PanelGeneral.add(IDCurso);
+        IDString = new JLabel("El codigo ingresado es invalido.");
+        IDString.setForeground(Color.RED);
+        IDString.setBounds(20,120,200,20);
+        PanelGeneral.add(IDString);
+        IDString.setVisible(false);
+        IDNoExiste = new JLabel("El codigo ingresado no existe.");
+        IDNoExiste.setForeground(Color.RED);
+        IDNoExiste.setBounds(20,120,200,20);
+        PanelGeneral.add(IDNoExiste);
+        IDNoExiste.setVisible(false);
+        VerificacionGraficaPie = new JCheckBox("Gráfica por sexo");
+        VerificacionGraficaPie.setBounds(270,100,130,20);
+        PanelGeneral.add(VerificacionGraficaPie);
+        VerificacionGraficaBarrasEdades = new JCheckBox("Gráfica por edad");
+        VerificacionGraficaBarrasEdades.setBounds(420,100,130,20);
+        PanelGeneral.add(VerificacionGraficaBarrasEdades);
+        VerificacionGraficaBarrasNotas = new JCheckBox("Gráfica por ordenamiento de notas");
+        VerificacionGraficaBarrasNotas.setBounds(570,100,230,20);
+        PanelGeneral.add(VerificacionGraficaBarrasNotas);
+        VerificacionGraficaPie.addActionListener(this);
+        VerificacionGraficaBarrasEdades.addActionListener(this);
+        VerificacionGraficaBarrasNotas.addActionListener(this);
+//        -----------------------------------------------------------
 //        Boton para cargar archivos
         CargarArchivos = new JButton("Cargar Archivos");
         CargarArchivos.setBounds(670,70,130,20);
         PanelGeneral.add(CargarArchivos);
         CargarArchivos.addActionListener(this);
+//        PanelGraficaPie-----------------------------------------------------------------------------------------------
+    }
+    public void Componentes2(){
+        PanelGraficaPorSexo = new JPanel();
+        PanelGraficaPorSexo.setBounds(10,140,800,420);
+        PanelGraficaPorSexo.setLayout(new java.awt.BorderLayout());
+        PanelGeneral.add(PanelGraficaPorSexo);
+        PanelGraficaPorSexo.setVisible(false);
+    }
+    public void Componentes3(){
+        PanelGraficaPorEdad = new JPanel();
+        PanelGraficaPorEdad.setBounds(10,140,800,420);
+        PanelGraficaPorEdad.setLayout(new java.awt.BorderLayout());
+        PanelGeneral.add(PanelGraficaPorEdad);
+        PanelGraficaPorEdad.setVisible(false);
+    }
+    public Boolean ExisteID(){
+        Boolean key=false;
+        try {
+            int id = Integer.parseInt(IDCurso.getText().replaceAll(" ", ""));
+            IDString.setVisible(false);
+            for (int i = 0; i < Main.AsignacionesCargadas; i++) {
+                if (id==Main.Asignaciones[i].getCodigoC()){
+                    IDNoExiste.setVisible(false);
+                    key=true;
+                    break;
+                }else{
+                    IDNoExiste.setVisible(true);
+                    key=false;
+                }
+            }
+        }catch (Exception e){
+            //Error al obtener el id
+            IDString.setVisible(true);
+        }
+        return key;
     }
 
+    public void GraficaPorSexo(){
+        PanelGraficaPorSexo.removeAll();
+        int Codigo = Integer.parseInt(IDCurso.getText().replaceAll(" ",""));
+        int SexoM=0,SexoF=0;
+        for (int i = 0; i < Main.AsignacionesCargadas; i++) {
+            if(Codigo==Main.Asignaciones[i].getCodigoC()){
+                if(Main.Asignaciones[i].getGenero().equals("M")){
+                    SexoM++;
+                }
+                if (Main.Asignaciones[i].getGenero().equals("F")){
+                    SexoF++;
+                }
+            }
+        }
+        System.out.println("Femenino:"+SexoF+". Masculino:"+SexoM);
+        DefaultPieDataset data = new DefaultPieDataset();
+        data.setValue("FEMENINO",SexoF);
+        data.setValue("MASCULINO",SexoM);
+        JFreeChart chart = ChartFactory.createPieChart("GRÁFICA POR SEXO DEL CURSO: "+Codigo,data,true,true,false);
+        ChartPanel CP = new ChartPanel(chart);
+        PanelGraficaPorSexo.add(CP,BorderLayout.CENTER);
+
+    }
+    public void GraficaPorEdad(){
+        PanelGraficaPorEdad.removeAll();
+        int Codigo = Integer.parseInt(IDCurso.getText().replaceAll(" ",""));
+        String[][] Rangos = new String[10][2];
+        String[] R= new String[]{"0-9","10-19","20-29","30-39","40-49","50-59","60-69","70-79","80-89","90-100"};
+        for (int i = 0; i < 10; i++) {
+            Rangos[i][0]=R[i];
+            Rangos[i][1]=String.valueOf(0);
+        }
+        for (int i = 0; i < Main.AsignacionesCargadas; i++) {
+            if (Codigo==Main.Asignaciones[i].getCodigoC()){
+                String[] AñoNacimiento =Main.Asignaciones[i].getFechaNacimiento().split("/");
+                int añoN=Integer.parseInt(AñoNacimiento[2]);
+                int edad = 2021-añoN;
+                if((edad<=9)){
+                    Rangos[0][1]=String.valueOf(Integer.valueOf(Rangos[0][1])+1);
+                }else if(edad>=10&&edad<=19){
+                    Rangos[1][1]=String.valueOf(Integer.valueOf(Rangos[1][1])+1);
+                }else if(edad>=20&&edad<=29){
+                    Rangos[2][1]=String.valueOf(Integer.valueOf(Rangos[2][1])+1);
+                }else if(edad>=30&&edad<=39){
+                    Rangos[3][1]=String.valueOf(Integer.valueOf(Rangos[3][1])+1);
+                }else if(edad>=40&&edad<=49){
+                    Rangos[4][1]=String.valueOf(Integer.valueOf(Rangos[4][1])+1);
+                }else if(edad>=50&&edad<=59){
+                    Rangos[5][1]=String.valueOf(Integer.valueOf(Rangos[5][1])+1);
+                }else if(edad>=60&&edad<=69){
+                    Rangos[6][1]=String.valueOf(Integer.valueOf(Rangos[6][1])+1);
+                }else if(edad>=70&&edad<=79){
+                    Rangos[7][1]=String.valueOf(Integer.valueOf(Rangos[7][1])+1);
+                }else if(edad>=80&&edad<=89){
+                    Rangos[8][1]=String.valueOf(Integer.valueOf(Rangos[8][1])+1);
+                }else if(edad>=90&&edad<=100){
+                    Rangos[9][1]=String.valueOf(Integer.valueOf(Rangos[9][1])+1);
+                }
+            }
+        }
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        for (int i = 0; i < 10; i++) {
+            if(Integer.parseInt(Rangos[i][1])!=0){
+                int cantidad=0;
+                cantidad=Integer.valueOf(Rangos[i][1]);
+                String rang="";
+                rang=Rangos[i][0];
+                dataset.addValue(cantidad,"ALUMNOS",rang);
+            }
+        }
+        JFreeChart chart = ChartFactory.createBarChart3D ("GRÁFICA POR EDAD DEL CURSO: "+Codigo,"RANGO DE EDAD", "CANTIDAD", dataset, PlotOrientation.VERTICAL, true,true, false);
+        ChartPanel CP = new ChartPanel(chart);
+        PanelGraficaPorEdad.add(CP,BorderLayout.CENTER);
+    }
     @Override
 //Icono
     public Image getIconImage(){
@@ -146,6 +296,42 @@ public class Ventana extends JFrame implements ActionListener {
                 FaltaArchivo.setVisible(false);
                 CampoVacio.setVisible(true);
                 //Campo vacio
+            }
+        }else if(ae.getSource() == VerificacionGraficaPie){
+            VerificacionGraficaBarrasNotas.setSelected(false);
+            VerificacionGraficaBarrasEdades.setSelected(false);
+            if(ExisteID()){
+                //panelPie
+                VerificacionGraficaPie.setSelected(true);
+                GraficaPorSexo();
+                PanelGraficaPorSexo.setVisible(true);
+                PanelGraficaPorEdad.setVisible(false);
+            }else{
+                PanelGraficaPorSexo.setVisible(false);
+                VerificacionGraficaPie.setSelected(false);
+            }
+        }else if(ae.getSource() == VerificacionGraficaBarrasEdades){
+            VerificacionGraficaPie.setSelected(false);
+            VerificacionGraficaBarrasNotas.setSelected(false);
+            if(ExisteID()){
+                VerificacionGraficaBarrasEdades.setSelected(true);
+                GraficaPorEdad();
+                PanelGraficaPorEdad.setVisible(true);
+                PanelGraficaPorSexo.setVisible(false);
+            }else{
+                PanelGraficaPorEdad.setVisible(false);
+                VerificacionGraficaBarrasEdades.setSelected(false);
+            }
+        }else if(ae.getSource()==VerificacionGraficaBarrasNotas){
+            VerificacionGraficaBarrasEdades.setSelected(false);
+            VerificacionGraficaPie.setSelected(false);
+            if(ExisteID()){
+                VerificacionGraficaBarrasNotas.setSelected(true);
+                PanelGraficaPorSexo.setVisible(false);
+                PanelGraficaPorEdad.setVisible(false);
+            }else{
+                PanelGraficaPorNotas.setVisible(false);
+                VerificacionGraficaBarrasNotas.setSelected(false);
             }
         }
     }
