@@ -13,14 +13,22 @@ import java.awt.event.*;
 import java.io.*;
 
 public class Ventana extends JFrame implements ActionListener {
-    public JPanel PanelGeneral,PanelGraficaPorSexo,PanelGraficaPorEdad,PanelGraficaPorNotas,PanelOrdenamiento;
+    public static JPanel PanelGeneral,PanelGraficaPorSexo,PanelGraficaPorEdad,PanelGraficaPorNotas,PanelOrdenamiento;
     public JButton CargarArchivos,Ordenar;
     public JTextField DireccionCarpeta,IDCurso;
     public JCheckBox VerificacionGraficaPie,VerificacionGraficaBarrasEdades,VerificacionGraficaBarrasNotas;
-    public JLabel CarpetaNoExiste,CampoVacio,FaltaArchivo,IDString,IDNoExiste;
+    public static JLabel CarpetaNoExiste,CampoVacio,FaltaArchivo,IDString,IDNoExiste,PasosN;
     public JComboBox TipoOrdenamiento,AlgoritmoOrdenamiento;
-    public JSlider Velocidad;
+    public static JSlider Velocidad;
     public int VelocidadEntero;
+    public static Float[][] DatosParaOrdenar;
+    public static int Codigo;
+    public static String OrdenA_O,AlgoritmoUsado;
+    public static JLabel CronometroLabel;
+    Accion Panel;
+    Thread hilo;
+    static int Horas=0,Minutos=0,Segundos=0,MilesimasSegundo;
+    static Boolean IniciaCrono=true,CorreCrono=false;
 
 //Ventana
     public Ventana() {
@@ -158,6 +166,11 @@ public class Ventana extends JFrame implements ActionListener {
         PanelGraficaPorEdad.setVisible(false);
     }
     public void Componentes4(){
+        PanelOrdenamiento = new JPanel();
+        PanelOrdenamiento.setBounds(10,220,840,350);
+        PanelOrdenamiento.setLayout(new java.awt.BorderLayout());
+        PanelGeneral.add(PanelOrdenamiento);
+        PanelOrdenamiento.setVisible(false);
         PanelGraficaPorNotas = new JPanel();
         PanelGraficaPorNotas.setBounds(0,140,880,490);
         PanelGraficaPorNotas.setLayout(null);
@@ -166,6 +179,9 @@ public class Ventana extends JFrame implements ActionListener {
         JLabel Orden = new JLabel("Escoja el orden de ordenamiento:");
         Orden.setBounds(20,0,200,20);
         PanelGraficaPorNotas.add(Orden);
+        PasosN = new JLabel("Pasos: 0");
+        PasosN.setBounds(20,40,200,20);
+        PanelGraficaPorNotas.add(PasosN);
         JLabel Algorit = new JLabel("Escoja el tipo de algoritmo:");
         Algorit.setBounds(250,0,200,20);
         PanelGraficaPorNotas.add(Algorit);
@@ -192,6 +208,12 @@ public class Ventana extends JFrame implements ActionListener {
         Ordenar.setBounds(730,10,110,30);
         PanelGraficaPorNotas.add(Ordenar);
         Ordenar.addActionListener(this);
+        JLabel C = new JLabel("Cronometro:");
+        C.setBounds(20,60,100,20);
+        PanelGraficaPorNotas.add(C);
+        CronometroLabel = new JLabel("00:00:00:00");
+        CronometroLabel.setBounds(100,60,200,20);
+        PanelGraficaPorNotas.add(CronometroLabel);
         Velocidad.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -199,11 +221,7 @@ public class Ventana extends JFrame implements ActionListener {
 //                System.out.println("Cambio la velocidad a: "+VelocidadEntero);
             }
         });
-        PanelOrdenamiento = new JPanel();
-        PanelOrdenamiento.setBounds(0,80,840,350);
-        PanelOrdenamiento.setLayout(new java.awt.BorderLayout());
-        PanelGraficaPorNotas.add(PanelOrdenamiento);
-        PanelOrdenamiento.setVisible(false);
+
     }
     public Boolean ExisteID(){
         Boolean key=false;
@@ -218,6 +236,21 @@ public class Ventana extends JFrame implements ActionListener {
                 }else{
                     IDNoExiste.setVisible(true);
                     IDString.setVisible(false);
+                    PanelOrdenamiento.setVisible(false);
+                    PanelGraficaPorEdad.setVisible(false);
+                    PanelGraficaPorNotas.setVisible(false);
+                    PanelGraficaPorSexo.setVisible(false);
+                    try {
+                        Panel.setVisible(false);
+                        try{
+                            hilo.stop();
+                            Accion.Crono.stop();
+                        }catch (Exception ee){
+
+                        }
+                    }catch (Exception ee){
+
+                    }
                     key=false;
                 }
             }
@@ -228,10 +261,22 @@ public class Ventana extends JFrame implements ActionListener {
             PanelGraficaPorEdad.setVisible(false);
             PanelGraficaPorNotas.setVisible(false);
             PanelGraficaPorSexo.setVisible(false);
+            PanelOrdenamiento.setVisible(false);
+            try {
+                hilo.stop();
+                Accion.Crono.stop();
+                try{
+                    Panel.setVisible(false);
+                }catch (Exception ee){
+
+                }
+            }catch (Exception ee){
+
+            }
         }
         return key;
     }
-
+//Graficas
     public void GraficaPorSexo(){
         PanelGraficaPorSexo.removeAll();
         int Codigo = Integer.parseInt(IDCurso.getText().replaceAll(" ",""));
@@ -327,60 +372,49 @@ public class Ventana extends JFrame implements ActionListener {
 //                System.out.println("ID: "+Datos[contador][0]+". Nota: "+Datos[contador][1]);
             }
         }
-//        for (int i = 0; i < Datos.length; i++) {
-//            System.out.println("ID:"+Datos[i][0]+". Nota: "+Datos[i][1]);
-//        }
         JFreeChart chart = ChartFactory.createBarChart3D("GRAFICA POR NOTAS DEL CURSO: "+Codigo,"ID ALUMNO","NOTA",dataset,PlotOrientation.VERTICAL,true,true,false);
         ChartPanel CP = new ChartPanel(chart);
         PanelOrdenamiento.add(CP,BorderLayout.CENTER);
-        String Algoritmo = AlgoritmoOrdenamiento.getItemAt(AlgoritmoOrdenamiento.getSelectedIndex()).toString();
-//        System.out.println(Algoritmo);
-        String OrdenAoD =TipoOrdenamiento.getItemAt(TipoOrdenamiento.getSelectedIndex()).toString();
-        if(Orden&&Algoritmo.equals("BUBBLE SORT")){
-//            System.out.println("Bubble short");
-            if(OrdenAoD.equals("ASCENDENTE")){
-//                System.out.println("Ascendente");
-                int pasos=0;
-                for (int i = 0; i < Datos.length; i++) {
-                    for (int j = i+1; j < Datos.length; j++) {
-                        if((Datos[i][1])>Datos[j][1]){
-                            Float tempN = Datos[i][1];
-                            Float tempId =Datos[i][0];
-                            Datos[i][1]=Datos[j][1];
-                            Datos[i][0]=Datos[j][0];
-                            Datos[j][1]=tempN;
-                            Datos[j][0]=tempId;
-                            System.out.println(pasos);
-                            pasos++;
-                            DefaultCategoryDataset data = new DefaultCategoryDataset();
-                            for (int k = 0; k < Datos.length; k++) {
-                                data.addValue(Datos[k][1],"ALUMNOS",String.valueOf(Datos[k][0]));
-                            }
-                            JFreeChart chartO = ChartFactory.createBarChart3D("GRAFICA POR NOTAS DEL CURSO: "+Codigo,"ID ALUMNO","NOTA",data,PlotOrientation.VERTICAL,true,true,false);
-                            ChartPanel CPOrden = new ChartPanel(chartO);
-                            PanelOrdenamiento.removeAll();
-                            PanelOrdenamiento.setVisible(false);
-                            PanelOrdenamiento.setVisible(true);
-                            esperar(Velocidad.getValue());
-                            PanelOrdenamiento.add(CPOrden,BorderLayout.CENTER);
-                        }
-                    }
-                }
+        //Muestra los datos cargados a la grafica
+//        for (int i = 0; i < Datos.length; i++) {
+//            System.out.println("ID:"+Datos[i][0]+". Nota: "+Datos[i][1]);
+//        }
+    }
+//Obtiene datos para el ordenamiento de graficas
+    public void ObtieneDatos(int IdCodigo, String Orden,String Algoritmo){
+        OrdenA_O=Orden;
+        AlgoritmoUsado=Algoritmo;
+        Codigo=IdCodigo;
+        Float[][] temp = new Float[1000000][2];
+        int contador=0;
+        for (int i = 0; i < Main.AsignacionesCargadas; i++) {
+            if(IdCodigo==Main.Asignaciones[i].getCodigoC()){
+                temp[contador][0]=Float.parseFloat(String.valueOf(Main.Asignaciones[i].getIdAlumno()));
+                temp[contador][1]=Main.Asignaciones[i].getNota();
+                contador++;
+//                System.out.println("ID: "+Datos[contador][0]+". Nota: "+Datos[contador][1]);
             }
         }
-        for (int i = 0; i < Datos.length; i++) {
-            System.out.println("ID:"+Datos[i][0]+". Nota: "+Datos[i][1]);
+        Float[][] temp2= new Float[contador][2];
+        for (int i = 0; i < temp2.length; i++) {
+            temp2[i][0]=temp[i][0];
+            temp2[i][1]=temp[i][1];
         }
+        DatosParaOrdenar=temp2;
+//        for (int i = 0; i < DatosParaOrdenar.length; i++) {
+//            System.out.println("ID:"+DatosParaOrdenar[i][0]+". Nota: "+DatosParaOrdenar[i][1]);
+//        }
     }
-    public static void esperar(int segundos){
+//Velocidad del ordenamiento de la grafica
+    public static void esperar(){
         try {
-            Thread.sleep(segundos * 1000);
+            Thread.sleep((2/Velocidad.getValue()) * 2000);
         } catch (Exception e) {
             System.out.println(e);
         }
     }
     @Override
-//Icono
+//Icono para la ventana
     public Image getIconImage(){
         return Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("Imagenes/escudo10.png"));
     }
@@ -473,11 +507,24 @@ public class Ventana extends JFrame implements ActionListener {
                 VerificacionGraficaPie.setSelected(true);
                 GraficaPorSexo();
                 PanelGraficaPorSexo.setVisible(true);
+                try {
+                    Panel.setVisible(false);
+                    try{
+                        hilo.stop();
+                        Accion.Crono.stop();
+                    }catch (Exception e){
+
+                    }
+                }catch (Exception e){
+
+                }
                 PanelGraficaPorEdad.setVisible(false);
                 PanelGraficaPorNotas.setVisible(false);
+                PanelOrdenamiento.setVisible(false);
             }else{
                 PanelGraficaPorSexo.setVisible(false);
                 VerificacionGraficaPie.setSelected(false);
+                PanelOrdenamiento.setVisible(false);
             }
         }else if(ae.getSource() == VerificacionGraficaBarrasEdades){
             VerificacionGraficaPie.setSelected(false);
@@ -486,33 +533,81 @@ public class Ventana extends JFrame implements ActionListener {
                 VerificacionGraficaBarrasEdades.setSelected(true);
                 GraficaPorEdad();
                 PanelGraficaPorEdad.setVisible(true);
+                try {
+                    Panel.setVisible(false);
+                    try{
+                        hilo.stop();
+                        Accion.Crono.stop();
+                    }catch (Exception e){
+
+                    }
+                }catch (Exception e){
+
+                }
                 PanelGraficaPorSexo.setVisible(false);
                 PanelGraficaPorNotas.setVisible(false);
+                PanelOrdenamiento.setVisible(false);
             }else{
                 PanelGraficaPorEdad.setVisible(false);
+                PanelOrdenamiento.setVisible(false);
                 VerificacionGraficaBarrasEdades.setSelected(false);
             }
         }else if(ae.getSource()==VerificacionGraficaBarrasNotas){
             VerificacionGraficaBarrasEdades.setSelected(false);
             VerificacionGraficaPie.setSelected(false);
+            PasosN.setText("Pasos: 0");
             if(ExisteID()){
                 VerificacionGraficaBarrasNotas.setSelected(true);
+                CronometroLabel.setText("00:00:00:00");
                 GraficaPorNotas(false);
                 PanelOrdenamiento.setVisible(true);
+                try {
+                    Panel.setVisible(false);
+                    try{
+                        hilo.stop();
+                        Accion.Crono.stop();
+                    }catch (Exception e){
+
+                    }
+                }catch (Exception e){
+
+                }
                 PanelGraficaPorSexo.setVisible(false);
                 PanelGraficaPorEdad.setVisible(false);
                 PanelGraficaPorNotas.setVisible(true);
             }else{
+                PanelOrdenamiento.setVisible(false);
                 PanelGraficaPorNotas.setVisible(false);
                 VerificacionGraficaBarrasNotas.setSelected(false);
             }
         }else if(ae.getSource()==Ordenar){
             //Boton ordenar
-            GraficaPorNotas(true);
-            PanelOrdenamiento.setVisible(true);
+//            GraficaPorNotas(true);
+            try{
+                hilo.stop();
+            }catch (Exception e){
+
+            }
+//            if (CorreCrono==false){
+//                IniciaCrono=true;
+//                CorreCrono=true;
+//                HiloCrono();
+//            }
+            ObtieneDatos(Integer.parseInt(IDCurso.getText()),TipoOrdenamiento.getItemAt(TipoOrdenamiento.getSelectedIndex()).toString(),AlgoritmoOrdenamiento.getItemAt(AlgoritmoOrdenamiento.getSelectedIndex()).toString());
+            Panel = new Accion(DatosParaOrdenar,Codigo,OrdenA_O,AlgoritmoUsado);
+            Panel.setBounds(10,80,840,350);
+            Panel.setLayout(new java.awt.BorderLayout());
+            PanelGraficaPorNotas.add(Panel);
+            Panel.setVisible(true);
+            hilo = new Thread(Panel);
+            hilo.start();
+//            Elimina basosadas
+            PanelOrdenamiento.removeAll();
             PanelGraficaPorSexo.setVisible(false);
             PanelGraficaPorEdad.setVisible(false);
             PanelGraficaPorNotas.setVisible(true);
         }
     }
+
+
 }
