@@ -64,7 +64,7 @@ public class Main {
     }
     public static void MostrarAlumnos(){
         for (int i = 0; i < AlumnosCargados; i++) {
-            System.out.println(Alumnos[i].Mostrar());
+//            System.out.println(Alumnos[i].Mostrar());
         }
     }
     public static void ReiniciarAlumnos(){
@@ -137,7 +137,7 @@ public class Main {
     }
     public static void MostrarCursos(){
         for (int i = 0; i < CursosCargados; i++) {
-            System.out.println(Cursos[i].Mostrar());
+//            System.out.println(Cursos[i].Mostrar());
         }
     }
 
@@ -205,7 +205,7 @@ public class Main {
     }
     public static void MostrarAsignaciones(){
         for (int i = 0; i < AsignacionesCargadas; i++) {
-            Asignaciones[i].Mostrar();
+//            Asignaciones[i].Mostrar();
         }
     }
     public static void ReiniciarAsignaciones(){

@@ -585,6 +585,7 @@ public class Ventana extends JFrame implements ActionListener {
 //            GraficaPorNotas(true);
             try{
                 hilo.stop();
+                Accion.Crono.stop();
             }catch (Exception e){
 
             }
@@ -593,19 +594,40 @@ public class Ventana extends JFrame implements ActionListener {
 //                CorreCrono=true;
 //                HiloCrono();
 //            }
-            ObtieneDatos(Integer.parseInt(IDCurso.getText()),TipoOrdenamiento.getItemAt(TipoOrdenamiento.getSelectedIndex()).toString(),AlgoritmoOrdenamiento.getItemAt(AlgoritmoOrdenamiento.getSelectedIndex()).toString());
-            Panel = new Accion(DatosParaOrdenar,Codigo,OrdenA_O,AlgoritmoUsado);
-            Panel.setBounds(10,80,840,350);
-            Panel.setLayout(new java.awt.BorderLayout());
-            PanelGraficaPorNotas.add(Panel);
-            Panel.setVisible(true);
-            hilo = new Thread(Panel);
-            hilo.start();
+            if(ExisteID()) {
+                CorreCrono=false;
+                IniciaCrono=true;
+                ObtieneDatos(Integer.parseInt(IDCurso.getText()), TipoOrdenamiento.getItemAt(TipoOrdenamiento.getSelectedIndex()).toString(), AlgoritmoOrdenamiento.getItemAt(AlgoritmoOrdenamiento.getSelectedIndex()).toString());
+                Panel = new Accion(DatosParaOrdenar, Codigo, OrdenA_O, AlgoritmoUsado);
+                Panel.setBounds(10, 80, 840, 350);
+                Panel.setLayout(new java.awt.BorderLayout());
+                PanelGraficaPorNotas.add(Panel);
+                Panel.setVisible(true);
+                hilo = new Thread(Panel);
+                hilo.start();
+                PanelOrdenamiento.removeAll();
+                PanelGraficaPorSexo.setVisible(false);
+                PanelGraficaPorEdad.setVisible(false);
+                PanelGraficaPorNotas.setVisible(true);
+            }else{
+                try {
+                    Panel.setVisible(false);
+                    try{
+                        hilo.stop();
+                        Accion.Crono.stop();
+                    }catch (Exception e){
+
+                    }
+                }catch (Exception e){
+
+                }
+                PanelGraficaPorSexo.setVisible(false);
+                PanelGraficaPorEdad.setVisible(false);
+                PanelGraficaPorNotas.setVisible(false);
+                PanelOrdenamiento.setVisible(false);
+            }
 //            Elimina basosadas
-            PanelOrdenamiento.removeAll();
-            PanelGraficaPorSexo.setVisible(false);
-            PanelGraficaPorEdad.setVisible(false);
-            PanelGraficaPorNotas.setVisible(true);
+
         }
     }
 
